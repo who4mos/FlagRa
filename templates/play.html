@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Play{% endblock %}
+
+{% block body %}
+<main>
+
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <img
+          class="img-fluid d-block"
+          alt="Flag to guess"
+          src="{{ img_url }}"
+        />        
+      </div>
+      
+      <div class="col-md-6 d-flex flex-column">
+        
+
+        <h2 class="text-md-start text-center">Which country is this?</h2>
+        <form action="{{ url_for('check_guess') }}" method="post">
+          <div class="d-flex flex-column gap-2">
+            {% for choice in choices %}
+            <button class="btn btn-outline-dark" type="submit" name="guess" value="{{ choice['name']['common'] }}">
+              {{ choice['name']['common'] }}
+            </button>
+            {% endfor %}
+          </div>
+        </form>
+        
+
+        <div class="div mt-auto">
+          <p class="lead">Score: {{ score }}/{{ current_id }}</p>
+        </div>
+      </div>
+
+      
+  </div>
+</div>
+
+  
+</main>
+{% endblock %}

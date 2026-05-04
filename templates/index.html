@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body %}
+<main>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="d-flex align-items-baseline justify-content-center gap-2">
+          <h1>FlagRa</h1>
+          <p class="lead">Settings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <form action="{{ url_for('setup') }}" method="post">
+      <div class="row py-4 g-4">
+
+        <!-- region -->
+        <div class="col-md-6">
+          <h2>Region</h2>
+          <p class="lead">Choose the region to request flags from.</p>
+          <div class="row g-4">
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'World' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-world" value="World" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-world">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='world-robinson.svg') }}" alt="World"/>
+                World
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'Africa' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-africa" value="Africa" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-africa">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='africa.svg') }}" alt="Africa"/>
+                Africa
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'Americas' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-americas" value="Americas" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-americas">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='americas.svg') }}" alt="Americas"/>
+                Americas
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'South America' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-south-america" value="South America" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-south-america">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='south-america.svg') }}" alt="South America"/>
+                South America
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'North & Central America' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-north-central-america" value="North & Central America" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-north-central-america">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='north-america.svg') }}" alt="North America"/>
+                North & Central America
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'Asia' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-asia" value="Asia" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-asia">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='asia.svg') }}" alt="Asia"/>
+                Asia
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'Europe' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-europe" value="Europe" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-europe">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='europe.svg') }}" alt="Europe"/>
+                Europe
+              </label>
+            </div>
+            <div class="col-4 col-md-3">
+              <input {% if current_region == 'Oceania' %}checked{% endif %}
+                     type="radio" class="btn-check" name="region" id="region-oceania" value="Oceania" autocomplete="off">
+              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-oceania">
+                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename='oceania.svg') }}" alt="Oceania"/>
+                Oceania
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- alternatives -->
+        <div class="col-md-6">
+          <h2>Number of alternatives</h2>
+          <p class="lead">Choose the amount of alternatives should appear when guessing a flag.</p>
+          <div class="div">
+            <input type="radio" class="btn-check" name="num_choices" id="num-2" value="2" {% if current_num == 2 %}checked{% endif %} autocomplete="off">
+            <label class="btn btn-outline-dark fs-4" for="num-2">2</label>
+            
+            <input type="radio" class="btn-check" name="num_choices" id="num-4" value="4" {% if current_num == 4 %}checked{% endif %} autocomplete="off">
+            <label class="btn btn-outline-dark fs-4" for="num-4">4</label>
+            
+            <input type="radio" class="btn-check" name="num_choices" id="num-6" value="6" {% if current_num == 6 %}checked{% endif %} autocomplete="off">
+            <label class="btn btn-outline-dark fs-4" for="num-6">6</label>
+          </div>
+        </div>
+      </div>
+      <div class="row py-4 g-4 justify-content-center">
+        <div class="col-md-6">
+          <button class="btn btn-outline-dark" type="submit">Save & Play</button>          
+        </div>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock %}
