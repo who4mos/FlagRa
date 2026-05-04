@@ -4,15 +4,50 @@
 
 ** Description
 
-FlagRa is a flag guessing game, written in flask using the [[https://restcountries.com/][restcountries API]].
+FlagRa is a flag-guessing game written in Flask where you choose a region of the world and try to guess its flags.
 
+The project integrates with the [[https://restcountries.com/][REST Countries API]] to source the data for the flags and countries, which allows the game to dynamically fetch and serve accurate, up-to-date national flags and related countries info.
+
+Currently, the game operates without a backend relational database. However, future development plans include implementing a database system (SQLite or PostgreSQL). This will allow the creation of user accounts, the tracking of personal gameplay records and stats (like highest streaks and win/loss ratios), and the introduction of global leaderboards.
+
+** Files
+
+- [[file:app.py][app.py]]
+  The application itself, python flask server configuration and routing logic. It manages HTTP requests, manages user's session data and controls the game flow.
+  
+- [[file:restcountries.json][restcountries.json]]
+  Local data cache, every time the server starts it tries to get a new version of the data using the ~requests~ library. If it fails, uses this backup.
+  
+- [[file:requirements.txt][requirements.txt]]
+  Python dependencies to run the application, that was generated with ~pip freeze~.
+  
+- [[file:templates/][templates/]]
+  Contains all HTML template files. Here the Jinja templating engine injects the data passed in ~app.py~ to the HTML document. 
+  
+- [[file:static/][static/]]
+  Contains menu images, a [[file:static/css/style.css][CSS stylesheet]] and a [[file:static/js/script.js][JavaScript script]] (they handle theme switching).
+
+** Routes 
+
+- ~/~: This route renders the main menu (~index.html~), where the user selects the region and the number of alternatives. It also checks the session to remember and pre-select the user's previously chosen settings (and defaults).
+
+- ~/setup~: This handles the form submission from the main menu (POST). It filters the global list of flags based on the chosen region, shuffles the valid flag IDs into a queue, resets the user's score and history to zero, and then redirects the user to the ~/play~ route to start the game.
+
+- ~/play~: This is the main game loop that renders ~play.html~. It grabs the current flag from the flags queue, randomly selects the chosen number of incorrect alternative countries, shuffles the choices, and stores the correct answer in the session, when the user submits the form in ~play.html~, it is redirected to ~/check~.
+
+- ~/check~: This route evaluates the user's submitted guess (POST) against the correct flag stored in the session. It increments the score if the guess is correct, appends the round's data to the session history, flashes a success or error message, and redirects back to ~/play~ (GET) for the next round.
+
+- ~/results~: This is the end-game screen that renders ~results.html~. Once the flag queue is empty, ~/play~ redirects the user here, this route then retrieves the final score, the total number of rounds played, and a game history containing each guess the user has made.
 
 ** Installation & Usage
 
+To run in your machine, you need to setup the virtual environment and start the flask app.
+
 #+begin_src shell
-  source .venv/bin/activate
-  pip install -r requirements.txt
-  flask run
+  source .venv/bin/activate       # activate virtual environment
+  pip install -r requirements.txt # install dependencies
+  flask run                       # run app @ localhost:5000
 #+end_src
 
 Then just open your browser at [[http://localhost:5000/]] and have fun!
+
