@@ -3,6 +3,7 @@ import os
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 import random
+import redis
 import requests
 
 try:
@@ -25,9 +26,18 @@ flags = [country for country in all_flags if country.get("independent")]
             
 app = Flask(__name__)
 
-app.secret_key = os.urandom(24)
+app.secret_key = os.environ.get("SECRET_KEY", "fallback-dev-key")
+
+app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "Filesystem"
+app.config["SESSION_USE_SIGNER"] = True
+app.config['SESSION_KEY_PREFIX'] = "flagra:"
+
+redis_url = os.environ.get('REDIS_URL') 
+
+if redis_url:
+    app.config['SESSION_REDIS'] = redis.from_url(redis_url)
+
 
 Session(app)
 
