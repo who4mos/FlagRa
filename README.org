@@ -10,6 +10,8 @@ The project integrates with the [[https://restcountries.com/][REST Countries API
 
 Currently, the game operates without a backend relational database. However, future development plans include implementing a database system (SQLite or PostgreSQL). This will allow the creation of user accounts, the tracking of personal gameplay records and stats (like highest streaks and win/loss ratios), and the introduction of global leaderboards.
 
+By now, the game is deployed on https://flagra.onrender.com/ and it's using redis to manage sessions. If running locally, ~REDIS_URL~ will not be defined so Flask-Session's filesystem will be used, just follow instructions in [[id:07c7f744-c2a9-4cb5-907b-2a4aa5b3c6db][Installation & Usage]].
+
 ** Files
 
 - [[file:app.py][app.py]]
@@ -40,6 +42,9 @@ Currently, the game operates without a backend relational database. However, fut
 - ~/results~: This is the end-game screen that renders ~results.html~. Once the flag queue is empty, ~/play~ redirects the user here, this route then retrieves the final score, the total number of rounds played, and a game history containing each guess the user has made.
 
 ** Installation & Usage
+:PROPERTIES:
+:ID:       07c7f744-c2a9-4cb5-907b-2a4aa5b3c6db
+:END:
 
 To run in your machine, you need to setup the virtual environment and start the flask app.
 

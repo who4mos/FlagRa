@@ -22,22 +22,27 @@ except:
     with open("restcountries.json") as json_file:
         all_flags = json.load(json_file)
 
+# get all independent countries        
 flags = [country for country in all_flags if country.get("independent")]
             
 app = Flask(__name__)
 
+# get production or local secret key
 app.secret_key = os.environ.get("SECRET_KEY", "fallback-dev-key")
 
-app.config["SESSION_TYPE"] = "redis"
+# get production redis-url
+redis_url = os.environ.get('REDIS_URL')
+
+# set session to redis or filesystem if running local
+if redis_url:
+    app.config["SESSION_TYPE"] = "redis"
+    app.config['SESSION_REDIS'] = redis.from_url(redis_url)
+    app.config['SESSION_KEY_PREFIX'] = "flagra:"
+else:
+    app.config["SESSION_TYPE"] = "filesystem"
+
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
-app.config['SESSION_KEY_PREFIX'] = "flagra:"
-
-redis_url = os.environ.get('REDIS_URL') 
-
-if redis_url:
-    app.config['SESSION_REDIS'] = redis.from_url(redis_url)
-
 
 Session(app)
 
