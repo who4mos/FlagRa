@@ -1,4 +1,5 @@
 import json
+from dotenv import load_dotenv
 import os
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
@@ -27,8 +28,11 @@ flags = [country for country in all_flags if country.get("independent")]
             
 app = Flask(__name__)
 
-# get production or local secret key
-app.secret_key = os.environ.get("SECRET_KEY", "fallback-dev-key")
+# this get the local secret key if a .env exists with SECRET_KEY
+load_dotenv()
+
+# if not on production and local secret don't exist as well load fallback str
+app.secret_key = os.environ.get("SECRET_KEY", "42069")
 
 # get production redis-url
 redis_url = os.environ.get('REDIS_URL')

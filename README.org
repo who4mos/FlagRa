@@ -46,7 +46,25 @@ By now, the game is deployed on https://flagra.onrender.com/ and it's using redi
 :ID:       07c7f744-c2a9-4cb5-907b-2a4aa5b3c6db
 :END:
 
-To run in your machine, you need to setup the virtual environment and start the flask app.
+#+begin_quote
+[!NOTE]
+Before running the application, it's recommended to set up your local environment variables.
+If you skip this step, the app will still run using a fallback placeholder key (~42069~). This is perfectly fine for local gameplay and testing. However, keep in mind that the ~SECRET_KEY~ is used by Flask to securely sign session cookies, so it must be strong and unique in a production environment.
+#+end_quote
+
+First, generate a secure secret key:
+
+#+begin_src shell
+  python -c "import secrets; print(secrets.token_hex(24))"
+#+end_src
+
+Then, create a file named ~.env~ in the project root and add your newly generated key:
+
+#+begin_src shell
+  SECRET_KEY=<paste-your-generated-key>
+#+end_src
+
+To run the game on your machine, set up the virtual environment and start the Flask app:
 
 #+begin_src shell
   source .venv/bin/activate       # activate virtual environment
@@ -55,4 +73,3 @@ To run in your machine, you need to setup the virtual environment and start the 
 #+end_src
 
 Then just open your browser at [[http://localhost:5000/]] and have fun!
-
