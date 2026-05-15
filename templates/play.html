@@ -19,7 +19,7 @@
         
 
         <h2 class="text-md-start text-center">Which country is this?</h2>
-        <form action="{{ url_for('check_guess') }}" method="post">
+        <form action="{{ url_for('game.check_guess') }}" method="post">
           <div class="d-flex flex-column gap-2">
             {% for choice in choices %}
             <button class="btn btn-outline-dark" type="submit" name="guess" value="{{ choice['name']['common'] }}">

@@ -8,38 +8,57 @@ FlagRa is a flag-guessing game written in Flask where you choose a region of the
 
 The project integrates with the [[https://restcountries.com/][REST Countries API]] to source the data for the flags and countries, which allows the game to dynamically fetch and serve accurate, up-to-date national flags and related countries info.
 
-Currently, the game operates without a backend relational database. However, future development plans include implementing a database system (SQLite or PostgreSQL). This will allow the creation of user accounts, the tracking of personal gameplay records and stats (like highest streaks and win/loss ratios), and the introduction of global leaderboards.
+The application now has a fully functional local backend using SQLite managed via SQLAlchemy. Users can securely register accounts, log in, and maintain their session state. The codebase uses modern Flask best practices, including the [[https://flask.palletsprojects.com/en/stable/tutorial/factory/][Application Factory pattern]] and [[https://flask.palletsprojects.com/en/stable/blueprints/][Blueprints]], to separate game logic from user authentication.
 
 By now, the game is deployed on https://flagra.onrender.com/ and it's using redis to manage sessions. If running locally, ~REDIS_URL~ will not be defined so Flask-Session's filesystem will be used, just follow instructions in [[id:07c7f744-c2a9-4cb5-907b-2a4aa5b3c6db][Installation & Usage]].
 
 ** Files
 
 - [[file:app.py][app.py]]
-  The application itself, python flask server configuration and routing logic. It manages HTTP requests, manages user's session data and controls the game flow.
+  The Application Factory. It initializes the Flask app, configures environment variables, connects the database, sets up the session, and registers the blueprints.
+  
+- [[file:auth.py][auth.py]]
+  The authentication blueprint. It manages user registration (password hashing via Werkzeug), login validation, and logout.
+  
+- [[file:game.py][game.py]]
+  The game blueprint. Contains the core game loop, API fetching logic, and manages the user's active gameplay session and score tracking.
+
+- [[file:models.py][models.py]] & [[file:database.py][database.py]]
+  Defines the database instance and the SQLAlchemy ORM schema, currently housing the ~User~ model to store account credentials securely.
   
 - [[file:restcountries.json][restcountries.json]]
-  Local data cache, every time the server starts it tries to get a new version of the data using the ~requests~ library. If it fails, uses this backup.
+  Local data cache. Every time the server starts it tries to get a new version of the data using the ~requests~ library. If it fails, uses this backup.
   
 - [[file:requirements.txt][requirements.txt]]
-  Python dependencies to run the application, that was generated with ~pip freeze~.
+  Python dependencies to run the application, generated with ~pip freeze~.
   
 - [[file:templates/][templates/]]
-  Contains all HTML template files. Here the Jinja templating engine injects the data passed in ~app.py~ to the HTML document. 
+  Contains all HTML template files, including game views and auth forms.
   
 - [[file:static/][static/]]
   Contains menu images, a [[file:static/css/style.css][CSS stylesheet]] and a [[file:static/js/script.js][JavaScript script]] (they handle theme switching).
-
+  
 ** Routes 
 
-- ~/~: This route renders the main menu (~index.html~), where the user selects the region and the number of alternatives. It also checks the session to remember and pre-select the user's previously chosen settings (and defaults).
+*** Game Routes (game.py)
 
-- ~/setup~: This handles the form submission from the main menu (POST). It filters the global list of flags based on the chosen region, shuffles the valid flag IDs into a queue, resets the user's score and history to zero, and then redirects the user to the ~/play~ route to start the game.
+- ~/~: Renders the main menu (~index.html~), where the user selects the region and the number of alternatives.
+  
+- ~/setup~: Handles the form submission from the main menu (POST). It filters flags based on the region, shuffles the valid IDs into a queue, resets the user's score, and redirects to ~/play~.
+  
+- ~/play~: The main game loop (~play.html~). It grabs the current flag, selects incorrect alternatives, shuffles choices, stores the correct answer in the session, and awaits the user's guess.
+  
+- ~/check~: Evaluates the user's guess (POST). Increments the score if correct, appends data to the session history, flashes messages (right or wrong), and redirects back to ~/play~ (GET) for the next round.
+  
+- ~/results~: The end-game screen (~results.html~). Retrieves the final score, total rounds played, and guess history when the flag queue is empty.
 
-- ~/play~: This is the main game loop that renders ~play.html~. It grabs the current flag from the flags queue, randomly selects the chosen number of incorrect alternative countries, shuffles the choices, and stores the correct answer in the session, when the user submits the form in ~play.html~, it is redirected to ~/check~.
+*** Authentication Routes (auth.py)
 
-- ~/check~: This route evaluates the user's submitted guess (POST) against the correct flag stored in the session. It increments the score if the guess is correct, appends the round's data to the session history, flashes a success or error message, and redirects back to ~/play~ (GET) for the next round.
-
-- ~/results~: This is the end-game screen that renders ~results.html~. Once the flag queue is empty, ~/play~ redirects the user here, this route then retrieves the final score, the total number of rounds played, and a game history containing each guess the user has made.
+- ~/register~: Displays the register form (GET) and processes new user registration, inserting the user in the database (POST).
+  
+- ~/login~: Displays the login form (GET) and securely authenticates returning users, mapping their database ID to the active Flask session (POST).
+  
+- ~/logout~: Safely clears the user's active session and redirects them back to the main menu.
 
 ** Installation & Usage
 :PROPERTIES:
@@ -69,7 +88,7 @@ To run the game on your machine, set up the virtual environment and start the Fl
 #+begin_src shell
   source .venv/bin/activate       # activate virtual environment
   pip install -r requirements.txt # install dependencies
-  flask run                       # run app @ localhost:5000
+  python app.py                   # init DB and runs app @ localhost:5000
 #+end_src
 
 Then just open your browser at [[http://localhost:5000/]] and have fun!
