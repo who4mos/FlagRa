@@ -139,18 +139,32 @@ def check_guess():
 # results
 @game.route("/results")
 def show_results():
+    total = session.get("current_id", 0)
+    if total == 0:
+        flash("You need to start guessing flags first...", "warning")
+        return redirect(url_for("game.index"))
+        
     flag_ids_queue = session.get("flag_ids_queue", [])
+
+    is_finished = total == len(flag_ids_queue)
+
+    
     history = session.get("history", [])
     score = session.get("score", 0)
-    total = session.get("current_id", 0)
-
     current_region = session.get("current_region", "World")
     current_num = int(session.get("num_choices", 4))
     
     return render_template("results.html",
-                           flag_ids_queue=flag_ids_queue,
                            history=history,
                            score=score,
                            total=total,
                            current_region=current_region,
-                           current_num=current_num)
+                           current_num=current_num,
+                           is_finished=is_finished)
+
+
+@game.route("/save")
+def save():
+    return ""
+
+

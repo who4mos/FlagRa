@@ -11,17 +11,52 @@
 
         <div class="col-lg-6">
           <div class="d-flex gap-2 align-items-baseline">
-            <h1>Results</h1>
-            <p class="lead">{{ current_region }} - {{ current_num }} options</p>
+            <h1>{% if is_finished %}Final Results{% else %}Current Progress{% endif %}</h1>
+            <p class="lead">{{ current_region }} ({{ current_num }} alternatives)</p>
           </div>
-          <p class="lead">Good game... here are your results:</p>
+
+          <p class="lead">
+            {% if is_finished %}
+              Good game... here are your final results:
+            {% else %}
+              You are currently playing... here are your partials:
+            {% endif %}
+          </p>
+
           <ul>
             <li>Flags Guessed: {{ total }}</li>
             <li>Correct: {{ score }}</li>
             <li>Wrong: {{ total - score }}</li>
           </ul>
-          <a href="{{ url_for('game.index') }}" class="btn btn-outline-dark">Play Again</a>
+
+          {% if is_finished %}
+          <div>
+            <!-- game finished -->
+            {% if session.get('user_id') %}
+            <!-- user logged in -->
+            <div class="d-flex gap-2">
+              <form action="{{ url_for('game.save') }}" method="POST">
+                <button type="submit" class="btn btn-dark">Save Score</button>
+              </form>
+              <a href="{{ url_for('game.index') }}" class="btn btn-outline-dark">Play Again</a>
+            </div>
+            {% else %}
+            <!-- user not logged in -->
+            <p>To save your score you must be logged in. <a href="{{ url_for('auth.login') }}" class="link-body-emphasis">Login</a> or <a href="{{ url_for('auth.register') }}" class="link-body-emphasis">Register</a></p>
+            <a href="{{ url_for('game.index') }}" class="btn btn-outline-dark">Play Again</a>
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="d-flex gap-2">
+            <!-- game not finished yet -->
+            <a href="{{ url_for('game.play') }}" class="btn btn-dark">Continue Game</a>
+            <a href="{{ url_for('game.index') }}" class="btn btn-outline-dark">Quit Game</a>
+          </div>
+          {% endif %}
         </div>
+
+            
+      
         
         <div class="col-lg-6">
           <h2>History</h2>
