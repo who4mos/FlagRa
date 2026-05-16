@@ -1,3 +1,4 @@
+from datetime import timedelta
 from database import db
 from models import User
 from dotenv import load_dotenv
@@ -28,7 +29,8 @@ def create_app():
     else:
         app.config["SESSION_TYPE"] = "filesystem"
 
-    app.config["SESSION_PERMANENT"] = False
+    app.config["SESSION_PERMANENT"] = True
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=4, minutes=20)
     app.config["SESSION_USE_SIGNER"] = True
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///flagra.db"
