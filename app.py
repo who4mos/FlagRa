@@ -1,10 +1,10 @@
 from datetime import timedelta
 from database import db
-from models import User
 from dotenv import load_dotenv
 import os
 from flask import Flask
 from flask_session import Session
+from flask_migrate import Migrate
 import redis
 from game import game
 from auth import auth
@@ -33,8 +33,13 @@ def create_app():
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=4, minutes=20)
     app.config["SESSION_USE_SIGNER"] = True
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///flagra.db"
+    # connect to production database(postgresql) or local sqlite3
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///flagra.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+    
     db.init_app(app)
+
+    migrate = Migrate(app, db)
     
     Session(app)
 

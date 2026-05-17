@@ -83,12 +83,13 @@ Then, create a file named ~.env~ in the project root and add your newly generate
   SECRET_KEY=<paste-your-generated-key>
 #+end_src
 
-To run the game on your machine, set up the virtual environment and start the Flask app:
+To run the game on your machine, set up the virtual environment, initialize the database, and start the Flask app:
 
 #+begin_src shell
   source .venv/bin/activate       # activate virtual environment
   pip install -r requirements.txt # install dependencies
-  python app.py                   # init DB and runs app @ localhost:5000
+  flask db upgrade                # initialize the local SQLite database
+  python app.py                   # runs app @ localhost:5000
 #+end_src
 
 Then just open your browser at [[http://localhost:5000/]] and have fun!
