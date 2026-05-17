@@ -41,6 +41,7 @@ def index():
 @game.route("/setup", methods=["POST"])
 def setup():
     session.pop("_flashes", None)
+    session.pop("next_url", None)
     
     current_region = request.form.get("region", "World")
     num_choices = int(request.form.get("num_choices", 4))
@@ -97,6 +98,7 @@ def play():
 
         if flag != correct_flag and flag not in choices:
             choices.append(flag)
+            
     choices.append(correct_flag)
     random.shuffle(choices)
     
@@ -155,6 +157,8 @@ def show_results():
 
     is_finished = total == len(flag_ids_queue)
 
+    if is_finished and "user_id" not in session:
+        session["next_url"] = request.path
     
     history = session.get("history", [])
     score = session.get("score", 0)
@@ -214,6 +218,7 @@ def save():
 def history():
     if "user_id" not in session:
         flash("You must be logged in.", "warning")
+        session["next_url"] = request.path
         return redirect(url_for("auth.login"))
     
     user_history = db.session.execute(

@@ -50,6 +50,10 @@ def register():
 
         flash(f"Welcome {username}!", "success")
         session["user_id"] = new_user.id
+
+        next_url = session.pop("next_url", None)
+        if next_url:
+            return redirect(next_url)
         
         return redirect(url_for("game.index"))
     else:
@@ -84,6 +88,11 @@ def login():
         # else, login
         session["user_id"] = user.id
         flash(f"Welcome back {user.username}", "success")
+
+        next_url = session.pop("next_url", None)
+        if next_url:
+            return redirect(next_url)
+        
         return redirect(url_for("game.index"))
         
     else:
