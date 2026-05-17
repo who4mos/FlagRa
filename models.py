@@ -9,7 +9,7 @@ class User(db.Model):
     username: Mapped[str] = mapped_column(String(20),
                                           unique=True,
                                           nullable=False)
-    password_hash: Mapped[str] = mapped_column(String(128),
+    password_hash: Mapped[str] = mapped_column(String(256),
                                                nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime,
                                                  server_default=func.now())
