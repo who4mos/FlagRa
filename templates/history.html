@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}History{% endblock %}
+
+{% block body %}
+  <main>
+
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="d-flex align-items-baseline justify-content-center gap-2">
+            <h1>FlagRa</h1>
+            <p class="lead">Game History</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+        
+        <div class="col-lg-6">
+          <table class="table">
+            <thead>
+              <th>Region</th>
+              <th>Game Mode</th>
+              <th>Corrects</th>
+              <th>Played At</th>
+            </thead>
+
+            {% for game in user_history %}
+            <tr>
+              <td>{{ game.region }}</td>
+              <td>{{ game.mode }}</td>
+              <td>{{ game.corrects }}</td>
+              <td>{{ game.played_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+
+        </div>
+        
+      </div>
+    </div>
+
+        
+
+{% endblock %}

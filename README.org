@@ -33,7 +33,7 @@ By now, the game is deployed on https://flagra.onrender.com/ and it's using redi
   Python dependencies to run the application, generated with ~pip freeze~.
   
 - [[file:templates/][templates/]]
-  Contains all HTML template files, including game views and auth forms.
+  Contains all HTML template files, including game views, user history and auth forms.
   
 - [[file:static/][static/]]
   Contains menu images, a [[file:static/css/style.css][CSS stylesheet]] and a [[file:static/js/script.js][JavaScript script]] (they handle theme switching).

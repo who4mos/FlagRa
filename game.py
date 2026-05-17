@@ -2,6 +2,9 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 import json
 import random
 import requests
+from sqlalchemy import select
+from database import db
+from models import History, User
 
 try:
     # get json from request
@@ -103,7 +106,11 @@ def play():
     session["correct_flag_name"] = correct_flag_name
     session["correct_flag_url"] = correct_flag_url
     
-    return render_template("play.html", img_url=correct_flag_url, choices=choices, score=session.get("score",0), current_id=session.get("current_id", 0))
+    return render_template("play.html",
+                           img_url=correct_flag_url,
+                           choices=choices,
+                           score=session.get("score",0),
+                           current_id=session.get("current_id", 0))
 
 
 # check guess
@@ -163,8 +170,56 @@ def show_results():
                            is_finished=is_finished)
 
 
-@game.route("/save")
+@game.route("/save", methods=["POST"])
 def save():
-    return ""
+    if "user_id" not in session:
+        flash("You must be logged in", "warning")
+        return redirect(url_for("game.show_results"))
+
+    total = session.get("current_id", 0)
+    flag_ids_queue = session.get("flag_ids_queue", [])
+
+    if not flag_ids_queue or total < len(flag_ids_queue):
+        flash("You cannot save an unfinished game!", "danger")
+        return redirect(url_for("game.show_results"))
+    
+    current_region = session.get("current_region", "World")
+
+    current_num = int(session.get("num_choices", 4))
+    game_mode = f"{current_num} Alternatives"
+
+    corrects = session.get("score", 0)
+
+    new_history = History(
+        user_id = session["user_id"],
+        region=current_region,
+        mode=game_mode,
+        corrects=corrects
+    )
+
+    db.session.add(new_history)
+    db.session.commit()
+
+    # clear history from session
+    session.pop("current_id", None)
+    session.pop("flag_ids_queue", None)
+    session.pop("score", None)
+    session.pop("history", None)
+    
+    flash("Game has been saved!", "success")
+    return redirect(url_for("game.history"))
 
 
+@game.route("/history")
+def history():
+    if "user_id" not in session:
+        flash("You must be logged in.", "warning")
+        return redirect(url_for("auth.login"))
+    
+    user_history = db.session.execute(
+        select(History)
+        .where(History.user_id == session["user_id"])
+        .order_by(History.played_at.desc())
+    ).scalars().all()
+    
+    return render_template("history.html", user_history=user_history)
