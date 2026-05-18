@@ -4,7 +4,7 @@ import random
 import requests
 from sqlalchemy import select
 from database import db
-from models import History, User
+from models import History
 
 try:
     # get json from request
@@ -25,16 +25,28 @@ except:
 # get all independent countries        
 flags = [country for country in all_flags if country.get("independent")]
 
-
+REGIONS = {
+    "world": {"label": "World", "image": "world-robinson.svg"},
+    "africa": {"label": "Africa", "image": "africa.svg"},
+    "americas": {"label": "Americas", "image": "americas.svg"},
+    "south-america": {"label": "South America", "image": "south-america.svg"},
+    "north-central-america": {"label": "North & Central America", "image": "north-america.svg"},
+    "asia": {"label": "Asia", "image": "asia.svg"},
+    "europe": {"label": "Europe", "image": "europe.svg"},
+    "oceania": {"label": "Oceania", "image": "oceania.svg"}
+}
 
 game = Blueprint("game", __name__)
 
 @game.route("/")
 def index():
-    current_region = session.get("current_region", "World")
+    current_region = session.get("current_region_key", "world")
     current_num = int(session.get("num_choices", 4))
 
-    return render_template("index.html", current_region=current_region, current_num=current_num)
+    return render_template("index.html",
+                           regions=REGIONS,
+                           current_region=current_region,
+                           current_num=current_num)
 
 
 # game setup
@@ -43,15 +55,15 @@ def setup():
     session.pop("_flashes", None)
     session.pop("next_url", None)
     
-    current_region = request.form.get("region", "World")
+    region_key = request.form.get("region", "world")
     num_choices = int(request.form.get("num_choices", 4))
 
-    session["current_region"] = current_region
-    session["num_choices"] = num_choices
+    if region_key not in REGIONS:
+        region_key = "world"
 
-    if current_region == "World":
+    if region_key == "world":
         flag_ids_queue = list(range(len(flags)))
-    elif current_region == "North & Central America":
+    elif region_key == "north-central-america":
         flag_ids_queue = [
             idx for idx, flag in enumerate(flags)
             if flag.get("subregion") in
@@ -60,9 +72,13 @@ def setup():
     else:
         flag_ids_queue = [
             idx for idx, flag in enumerate(flags)
-            if flag.get("region") == current_region
-            or flag.get("subregion") == current_region
+            if flag.get("region") == REGIONS[region_key]["label"]
+            or flag.get("subregion") == REGIONS[region_key]["label"]
         ]
+    
+    session["current_region"] = REGIONS[region_key]["label"]
+    session["current_region_key"] = region_key
+    session["num_choices"] = num_choices
 
     random.shuffle(flag_ids_queue)
     
