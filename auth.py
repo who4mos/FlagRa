@@ -48,9 +48,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        # logs user in
         flash(f"Welcome {username}!", "success")
         session["user_id"] = new_user.id
-
+        session["user_username"] = new_user.username
+        
         next_url = session.pop("next_url", None)
         if next_url:
             return redirect(next_url)
@@ -87,6 +89,7 @@ def login():
 
         # else, login
         session["user_id"] = user.id
+        session["user_username"] = user.username
         flash(f"Welcome back {user.username}", "success")
 
         next_url = session.pop("next_url", None)
@@ -103,6 +106,7 @@ def login():
 def logout():
     if "user_id" in session:
         session.pop("user_id", None)
+        session.pop("user_username", None)
         flash("You have been logged out.", "info")
     
     return redirect(url_for("game.index"))
