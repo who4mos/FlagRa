@@ -3,46 +3,45 @@
 {% block title %}History{% endblock %}
 
 {% block body %}
-  <main>
+  <div class="container d-flex flex-column flex-grow-1">
 
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <div class="d-flex align-items-baseline justify-content-center gap-2">
-            <h1>FlagRa</h1>
-            <p class="lead">Game History</p>
-          </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-6">
+        <div class="d-flex align-items-baseline justify-content-center gap-2">
+          <h1>FlagRa</h1>
+          <p class="small">Game History</p>
         </div>
       </div>
     </div>
 
-    <div class="container">
-      <div class="row g-4 justify-content-center">
-        
-        <div class="col-lg-6">
+    
+    <div class="row g-4 flex-grow-1 justify-content-center align-items-center">
+      <div class="col-lg-6">
+        <div id="table-history" class="table-responsive">
           <table class="table table-striped">
             <thead>
-              <th>Region</th>
-              <th>Game Mode</th>
-              <th>Corrects</th>
-              <th>Played At</th>
+              <tr>
+                <th>Region</th>
+                <th>Game Mode</th>
+                <th>Corrects</th>
+                <th>Played At</th>
+              </tr>
             </thead>
-
-            {% for game in user_history %}
-            <tr>
-              <td>{{ game.region }}</td>
-              <td>{{ game.mode }}</td>
-              <td>{{ game.corrects }}</td>
-              <td>{{ game.played_at.strftime('%Y-%m-%d %H:%M') }}</td>
-            </tr>
-            {% endfor %}
+            <tbody>
+              {% for game in user_history %}
+              <tr>
+                <td>{{ game.region }}</td>
+                <td>{{ game.mode }}</td>
+                <td>{{ game.corrects }}</td>
+                <td>{{ game.played_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
           </table>
-
         </div>
-        
       </div>
-    </div>
-
         
-
+    </div>
+    
+  </div>
 {% endblock %}

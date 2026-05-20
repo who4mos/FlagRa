@@ -3,81 +3,103 @@
 {% block title %}Settings{% endblock %}
 
 {% block body %}
-<main>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
+  <div class="container d-flex flex-column flex-grow-1">
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-lg-6">
         <div class="d-flex align-items-baseline justify-content-center gap-2">
           <h1>FlagRa</h1>
-          <p class="lead">Settings</p>
+          <p class="small">Settings</p>
         </div>
       </div>
     </div>
 
-    <form action="{{ url_for('game.setup') }}" method="post">
-      <div class="row py-4 g-4">
+    <form action="{{ url_for('game.setup') }}" method="post" class="d-flex flex-column flex-grow-1">
+
+      <div class="d-flex flex-column flex-lg-row gap-4 flex-grow-1 flex-lg-grow-0">
 
         <!-- region -->
-        <div class="col-md-6 d-flex flex-column gap-2">
-          <div>
-            <h2>Region</h2>
-            <p class="lead">Choose the region to request flags from.</p>
+        <div class="w-100 w-lg-50">
+          <div class="d-flex gap-2 align-items-baseline">
+            <h2 class="fs-3">Region</h2>
+            <p class="d-none d-md-block small">Choose the region to request flags from</p>
           </div>
-          <div class="row g-4">
+
+          <div class="row g-2">
             {% for region, data in regions.items() %}
-            <div class="col-4 col-md-3">
+            <div class="col-6 col-md-4 col-lg-3">
               <input
                 {% if current_region == region %}checked{% endif %}
                 type="radio" class="btn-check" name="region" id="region-{{ region }}" value="{{ region }}" autocomplete="off">
-              <label class="btn btn-outline-dark p-2 w-100 h-100" for="region-{{ region }}">
-                <img class="img-fluid d-block rounded mb-2" src="{{ url_for('static', filename=data.image) }}" alt="{{ data.label }}"/>
-                {{ data.label }}
+              <label class="btn btn-sm btn-outline-dark p-1 lh-sm w-100 h-100" for="region-{{ region }}">
+                <div class="row g-2 align-items-center">
+                  <div class="col-2 col-lg-12">
+                    <img class="img-fluid d-block rounded mx-auto" src="{{ url_for('static', filename=data.image) }}" alt="{{ region }}"/>
+                  </div>
+                  <div class="col-10 col-lg-12 text-start text-lg-center">
+                    {{ data.label }}
+                  </div>                  
+                </div>
               </label>
             </div>
             {% endfor %}
           </div>
-
+          
         </div>
 
         <!-- game modes -->
-        <div class="col-md-6 d-flex flex-column gap-2">
-          <div>
-            <h2 class=>Game Mode</h2>
-            <p class="lead">Choose how you're going to play.</p>
-          </div>
-          <div>
-            <h3><i class="bi bi-list-task me-1"></i>Multiple Choice</h3>
-            <p class="lead">Choose the amount of alternatives should appear when guessing a flag.</p>
-            <div>
-              <input type="radio" class="btn-check" name="num_choices" id="num-2" value="2" {% if current_num == 2 %}checked{% endif %} autocomplete="off">
-              <label class="btn btn-outline-dark fs-4" for="num-2">2</label>
-            
-              <input type="radio" class="btn-check" name="num_choices" id="num-4" value="4" {% if current_num == 4 %}checked{% endif %} autocomplete="off">
-              <label class="btn btn-outline-dark fs-4" for="num-4">4</label>
-            
-              <input type="radio" class="btn-check" name="num_choices" id="num-6" value="6" {% if current_num == 6 %}checked{% endif %} autocomplete="off">
-              <label class="btn btn-outline-dark fs-4" for="num-6">6</label>
-            </div>  
+        <div class="w-100 w-lg-50 d-flex flex-column flex-grow-1">
+          
+          <div class="d-flex gap-2 align-items-baseline">
+            <h2 class="fs-3">Game Mode</h2>
+            <p class="d-none d-md-block small">Choose how you're going to play</p>
           </div>
 
-          <div>
-            <h3><i class="bi bi-keyboard me-1"></i>Type</h3>
-            <p class="lead">No candidates, just type the name of the country.</p>
-            <input type="radio" class="btn-check" name="num_choices" id="type" value="2" {% if current_num == 2 %}checked{% endif %} autocomplete="off">
-              <label class="btn btn-outline-dark fs-4" for="type">Type</label>
+          <div class="row g-2 g-lg-5">
+            <!-- Alternatives -->
+
+            <div class="col-12 d-flex flex-row flex-lg-column align-items-center align-items-md-start justify-content-between">
+              <div class="">
+                <h3 class="fs-5"><i class="bi bi-list-task me-1"></i>Alternatives</h3>
+                <p class="small">Multiple choice.</p>
+              </div>
+              <div class="d-flex gap-2">
+                <input type="radio" class="btn-check" name="game-mode" id="2-alternatives" value="2-alternatives" {% if game_mode == '2-alternatives' %}checked{% endif %} autocomplete="off">
+                <label class="btn btn-sm btn-outline-dark fs-6" for="2-alternatives">2</label>
+            
+                <input type="radio" class="btn-check" name="game-mode" id="4-alternatives" value="4-alternatives" {% if game_mode == '4-alternatives' %}checked{% endif %} autocomplete="off">
+                <label class="btn btn-sm btn-outline-dark fs-6" for="4-alternatives">4</label>
+            
+                <input type="radio" class="btn-check" name="game-mode" id="6-alternatives" value="6-alternatives" {% if game_mode == '6-alternatives' %}checked{% endif %} autocomplete="off">
+                <label class="btn btn-sm btn-outline-dark fs-6" for="6-alternatives">6</label>
+              </div>  
+            </div>
+
+            <!-- Write in -->
+            <div class="col-12 d-flex flex-row flex-lg-column align-items-center align-items-md-start justify-content-between">
+              <div class="">
+                <h3 class="fs-5"><i class="bi bi-keyboard me-1"></i>Write In</h3>
+                <p class="small">Type the name of the country.</p>
+              </div>
+              <div class="d-flex">
+                <input type="radio" class="btn-check" name="game-mode" id="write-in" value="write-in" {% if game_mode == 'write-in' %}checked{% endif %} autocomplete="off">
+                <label class="btn btn-sm btn-outline-dark fs-6" for="write-in">Write In</label>
+              </div>
+            </div>
+
+
+
           </div>
-          
+
+          <div class="row g-2 mt-auto mb-2 mb-lg-0 ">
+            <button class="btn btn-outline-dark" type="submit">Save & Play</button>          
+          </div>
           
         </div>
       </div>
 
-      <div class="row py-4 g-4 justify-content-center">
-        <div class="col-md-6">
-          <button class="btn btn-outline-dark" type="submit">Save & Play</button>          
-        </div>
-      </div>
+
       
     </form>
   </div>
-</main>
 {% endblock %}

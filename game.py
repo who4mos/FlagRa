@@ -38,15 +38,19 @@ REGIONS = {
 
 game = Blueprint("game", __name__)
 
+def prettify_mode(game_mode):
+    return " ".join(game_mode.split("-")).title()
+
+
 @game.route("/")
 def index():
     current_region = session.get("current_region_key", "world")
-    current_num = int(session.get("num_choices", 4))
-
+    game_mode = session.get("game_mode", "4-alternatives")
+    
     return render_template("index.html",
                            regions=REGIONS,
                            current_region=current_region,
-                           current_num=current_num)
+                           game_mode=game_mode)
 
 
 # game setup
@@ -56,8 +60,8 @@ def setup():
     session.pop("next_url", None)
     
     region_key = request.form.get("region", "world")
-    num_choices = int(request.form.get("num_choices", 4))
-
+    game_mode = request.form.get("game-mode", "4-alternatives")
+    
     if region_key not in REGIONS:
         region_key = "world"
 
@@ -78,8 +82,10 @@ def setup():
     
     session["current_region"] = REGIONS[region_key]["label"]
     session["current_region_key"] = region_key
-    session["num_choices"] = num_choices
 
+    session["game_mode"] = game_mode
+    session["pretty_mode"] = prettify_mode(game_mode)
+    
     random.shuffle(flag_ids_queue)
     
     session["flag_ids_queue"] = flag_ids_queue
@@ -104,45 +110,67 @@ def play():
         return redirect(url_for("game.show_results"))
 
     correct_flag = flags[flag_ids_queue[current_id]]
-    num_choices = int(session.get("num_choices", 4))
-    if num_choices not in [2, 4, 6]:
-        num_choices = 4
 
-    choices = []
-    while len(choices) < num_choices - 1:
-        flag = flags[random.choice(flag_ids_queue)]
-
-        if flag != correct_flag and flag not in choices:
-            choices.append(flag)
-            
-    choices.append(correct_flag)
-    random.shuffle(choices)
-    
     correct_flag_name = correct_flag["name"]["common"]
     correct_flag_url = correct_flag["flags"]["svg"]
-
     session["correct_flag_name"] = correct_flag_name
     session["correct_flag_url"] = correct_flag_url
+
+    current_region = session.get("current_region", "World")
     
-    return render_template("play.html",
-                           img_url=correct_flag_url,
-                           choices=choices,
-                           score=session.get("score",0),
-                           current_id=session.get("current_id", 0))
+    game_mode = session.get("game_mode", "4-alternatives")
+    pretty_mode = session.get("pretty_mode", "4 Alternatives")
+    
+    
+    if game_mode == "write-in":
+        candidates = [
+            country["name"]["common"] for country in flags
+        ]
+        
+        return render_template("play.html",
+                               game_mode=game_mode,
+                               pretty_mode=pretty_mode,
+                               region=current_region,
+                               candidates=candidates,
+                               img_url=correct_flag_url,
+                               score=session.get("score",0),
+                               current_id=session.get("current_id", 0))
+    else:
+        alts = int(game_mode.split("-")[0])
+        if alts not in [2, 4, 6]:
+            alts = 4
+
+        choices = []
+        while len(choices) < alts - 1:
+            flag = flags[random.choice(flag_ids_queue)]
+
+            if flag != correct_flag and flag not in choices:
+                choices.append(flag)
+            
+        choices.append(correct_flag)
+        random.shuffle(choices)
+    
+        return render_template("play.html",
+                               game_mode=game_mode,
+                               pretty_mode=pretty_mode,
+                               region=current_region,                                                       img_url=correct_flag_url,
+                               choices=choices,
+                               score=session.get("score",0),
+                               current_id=session.get("current_id", 0))
 
 
 # check guess
 @game.route("/check", methods=["POST"])
 def check_guess():
-    guess = request.form.get("guess")
+    guess = request.form.get("guess", "")
     correct_flag_name = session.get("correct_flag_name")
     correct_flag_url = session.get("correct_flag_url")
 
     if not correct_flag_name:
         flash("Start a new game first!", "warning")
         return redirect(url_for("game.index"))
-    
-    if guess == correct_flag_name:
+
+    if guess.lower() == correct_flag_name.lower():
         flash("Correct! 🥳", "success")
         session["score"] += 1
     else:
@@ -179,14 +207,14 @@ def show_results():
     history = session.get("history", [])
     score = session.get("score", 0)
     current_region = session.get("current_region", "World")
-    current_num = int(session.get("num_choices", 4))
+    pretty_mode = session.get("pretty_mode", "4 Alternatives")
     
     return render_template("results.html",
+                           pretty_mode=pretty_mode,
                            history=history,
                            score=score,
                            total=total,
                            current_region=current_region,
-                           current_num=current_num,
                            is_finished=is_finished)
 
 
@@ -205,15 +233,14 @@ def save():
     
     current_region = session.get("current_region", "World")
 
-    current_num = int(session.get("num_choices", 4))
-    game_mode = f"{current_num} Alternatives"
+    pretty_mode = session.get("pretty_mode", "4 Alternatives")
 
     corrects = session.get("score", 0)
 
     new_history = History(
         user_id = session["user_id"],
         region=current_region,
-        mode=game_mode,
+        mode=pretty_mode,
         corrects=corrects
     )
 
@@ -225,6 +252,7 @@ def save():
     session.pop("flag_ids_queue", None)
     session.pop("score", None)
     session.pop("history", None)
+    
     
     flash("Game has been saved!", "success")
     return redirect(url_for("game.history"))

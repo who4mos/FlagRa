@@ -3,42 +3,83 @@
 {% block title %}Play{% endblock %}
 
 {% block body %}
-<main>
+  <div class="container d-flex flex-column flex-grow-1">
+    <p class="text-center">{{ region }} • {{ pretty_mode }}</p>
 
-  <div class="container">
     <div class="row g-4">
-      <div class="col-md-6">
+
+      <div class="col-lg-6">
         <img
-          class="img-fluid d-block"
+          class="img-fluid d-block flag-img mx-auto border border-secondary"
           alt="Flag to guess"
           src="{{ img_url }}"
         />        
       </div>
       
-      <div class="col-md-6 d-flex flex-column">
+      <div class="col-lg-6">
+        <h2 class="fs-3 text-md-start text-center">Which country is this?</h2>
         
-
-        <h2 class="text-md-start text-center">Which country is this?</h2>
         <form action="{{ url_for('game.check_guess') }}" method="post">
           <div class="d-flex flex-column gap-2">
-            {% for choice in choices %}
-            <button class="btn btn-outline-dark" type="submit" name="guess" value="{{ choice['name']['common'] }}">
-              {{ choice['name']['common'] }}
-            </button>
-            {% endfor %}
+
+            {% if game_mode == 'write-in' %}
+            <div class="d-flex flex-column gap-3">
+              <div class="position-relative">
+                <div class="input-group">
+                  <input
+                    id="country-input" 
+                    class="form-control" 
+                    type="text" 
+                    name="guess" 
+                    placeholder="Start typing country name..." 
+                    autocomplete="off"
+                    required 
+                    autofocus
+                  />
+                  
+                  <button class="btn btn-dark" type="submit">Submit</button>
+                </div>
+                <ul id="autocomplete-list" class="list-group">
+                </ul>
+
+              </div>
+            
+            </div>
+            
+            {% else %}
+            <div class="row g-2">
+              {% for choice in choices %}
+              <div class="col-6 col-lg-12">
+                <button class="btn btn-outline-dark w-100 h-100" type="submit" name="guess" value="{{ choice['name']['common'] }}">
+                  {{ choice['name']['common'] }}
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+
+          {% endif %}
           </div>
         </form>
-        
-
-        <div class="div mt-auto">
-          <p class="lead">Score: {{ score }}/{{ current_id }}</p>
-        </div>
       </div>
-
-      
+    </div>
+          
+    <div class="row mt-auto">
+      <div class="col-12 d-flex align-items-center justify-content-between mb-2">
+        <p class="mb-0">Score: {{ score }}/{{ current_id }}</p>
+        {% if current_id > 0 %}
+        <a class="btn btn-dark" href="{{ url_for('game.show_results') }}">
+          View Partials
+        </a>
+        {% endif %}
+      </div>
+    </div>
   </div>
-</div>
 
-  
-</main>
+{% if game_mode == 'write-in' %}
+<script type="application/json" id="candidates-data">
+  {{ candidates | tojson }}
+</script>
+<script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+{% endif %}
+
 {% endblock %}

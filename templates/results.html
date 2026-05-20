@@ -3,19 +3,15 @@
 {% block title %}Results{% endblock %}
 
 {% block body %}
-  <main>
-    <div class="container">
-      
+    <div class="container d-flex flex-column flex-grow-1">
 
-      <div class="row g-4">
-
-        <div class="col-lg-6">
-          <div class="d-flex gap-2 align-items-baseline">
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-7 col-lg-6">
+          <div class="d-flex align-items-baseline gap-2">
             <h1>{% if is_finished %}Final Results{% else %}Current Progress{% endif %}</h1>
-            <p class="lead">{{ current_region }} ({{ current_num }} alternatives)</p>
+            <p class="small">{{ current_region }} ({{ pretty_mode }})</p>
           </div>
-
-          <p class="lead">
+          <p>
             {% if is_finished %}
               Good game... here are your final results:
             {% else %}
@@ -36,9 +32,9 @@
             <!-- user logged in -->
             <div class="d-flex gap-2">
               <form action="{{ url_for('game.save') }}" method="POST">
-                <button type="submit" class="btn btn-dark">Save Score</button>
+                <button type="submit" class="btn btn-sm btn-dark">Save Score</button>
               </form>
-              <a href="{{ url_for('game.index') }}" class="btn btn-outline-dark">Play Again</a>
+              <a href="{{ url_for('game.index') }}" class="btn btn-sm btn-outline-dark">Play Again</a>
             </div>
             {% else %}
             <!-- user not logged in -->
@@ -55,28 +51,30 @@
           {% endif %}
         </div>
 
-            
-      
-        
-        <div class="col-lg-6">
+        <div class="col-md-5 col-lg-6">
           <h2>History</h2>
-          <table class="table">
-            <thead>
-              <th>Flag</th>
-              <th>Country</th>
-              <th>User Guess</th>
-            </thead>
-            {% for flag in history %}
-            <tr class="{% if flag['is_correct'] %} table-success {% else %} table-danger {% endif %}">
-              <td><img width="32px" alt="" src="{{ flag['url'] }}"/></td>
-              <td>{{ flag["name"] }}</td>
-              <td>{{ flag["user_guess"] }}</td>
-            </tr>
-            {% endfor %}
-          </table>
+          <div id="table-results" class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Flag</th>
+                  <th>Country</th>
+                  <th>User Guess</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for flag in history %}
+                <tr class="{% if flag['is_correct'] %} table-success {% else %} table-danger {% endif %}">
+                  <td><img width="32px" alt="" src="{{ flag['url'] }}"/></td>
+                  <td>{{ flag["name"] }}</td>
+                  <td>{{ flag["user_guess"] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
         
       </div>
     </div>
-  </main>
 {% endblock %}
