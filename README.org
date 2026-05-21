@@ -1,10 +1,8 @@
 * FlagRa
 
-** Video Demo: [[https://www.youtube.com/watch?v=7ajQ-irD1VU]]
-
 ** Description
 
-FlagRa is a flag-guessing game written in Flask where you choose a region of the world and try to guess its flags.
+FlagRa is a flag-guessing game written in Flask where you choose a region of the world and try to guess its flags. The game features two distinct gameplay styles: Multiple Choice, where you select the correct answer from a set of randomized alternatives, and Write-In, a challenging text-input mode where you must type out the name of the country yourself (with a little autocomplete help).
 
 The project integrates with the [[https://restcountries.com/][REST Countries API]] to source the data for the flags and countries, which allows the game to dynamically fetch and serve accurate, up-to-date national flags and related countries info.
 
@@ -36,7 +34,10 @@ By now, the game is deployed on https://flagra.onrender.com/ and it's using redi
   Contains all HTML template files, including game views, user history and auth forms.
   
 - [[file:static/][static/]]
-  Contains menu images, a [[file:static/css/style.css][CSS stylesheet]] and a [[file:static/js/script.js][JavaScript script]] (they handle theme switching).
+  - Images
+  - A [[file:static/css/style.css][CSS stylesheet]]
+  - A [[file:static/js/theme.js][theme switching script]]
+  - A [[file:static/js/autocomplete.js][autocomplete script]]
   
 ** Routes 
 
@@ -51,6 +52,8 @@ By now, the game is deployed on https://flagra.onrender.com/ and it's using redi
 - ~/check~: Evaluates the user's guess (POST). Increments the score if correct, appends data to the session history, flashes messages (right or wrong), and redirects back to ~/play~ (GET) for the next round.
   
 - ~/results~: The end-game screen (~results.html~). Retrieves the final score, total rounds played, and guess history when the flag queue is empty.
+
+- ~/leaderboard~: Compiles top 10 scores of each game mode filtered by region.
 
 *** Authentication Routes (auth.py)
 
