@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard{% endblock %}
+
+{% block body %}
+<div class="container d-flex flex-column flex-grow-1">
+
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-6">
+      <div class="d-flex align-items-baseline justify-content-center gap-2">
+        <h1>FlagRa</h1>
+        <p class="small">Leaderboard</p>
+      </div>
+    </div>
+  </div>
+  
+  <form method="GET" action="{{ url_for('game.leaderboard') }}" class="row g-3 mb-4 justify-content-center">
+    <div class="col-lg-6">
+      <select name="region" class="form-select" onchange="this.form.submit()">
+        {% for region, data in regions.items() %}
+        <option value="{{ region }}" {% if region == current_region %}selected{% endif %}>{{ data.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+    
+  <div class="d-flex flex-column flex-grow-1 pb-2">
+    <div class="row g-4">
+      {% for mode, rows in tops.items() %}
+      <div class="col-md-6 col-lg-3">
+        <div class="card h-100">
+          <div class="card-header">
+            {{ mode }}
+          </div>
+          <div class="card-body">
+            {% if rows %}
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Corrects</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for top in rows %}
+                  <tr>
+                    <td>{{ top.user.username }} </td>
+                    <td>{{ top.corrects }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="text-muted">
+              <i class="bi bi-trophy"></i>
+              No entries yet. Be the first!
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+    
+</div>
+
+{% endblock %}

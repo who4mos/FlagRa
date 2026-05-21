@@ -2,9 +2,10 @@ from flask import Blueprint, flash, redirect, render_template, request, session,
 import json
 import random
 import requests
-from sqlalchemy import select
+from sqlalchemy import desc, select
+from sqlalchemy.orm import joinedload
 from database import db
-from models import History
+from models import History, User
 
 try:
     # get json from request
@@ -39,17 +40,17 @@ REGIONS = {
 game = Blueprint("game", __name__)
 
 def prettify_mode(game_mode):
-    return " ".join(game_mode.split("-")).title()
+    return game_mode.replace('-', ' ').title()
 
 
 @game.route("/")
 def index():
-    current_region = session.get("current_region_key", "world")
+    current_region_key = session.get("current_region_key", "world")
     game_mode = session.get("game_mode", "4-alternatives")
     
     return render_template("index.html",
                            regions=REGIONS,
-                           current_region=current_region,
+                           current_region=current_region_key,
                            game_mode=game_mode)
 
 
@@ -272,3 +273,37 @@ def history():
     ).scalars().all()
     
     return render_template("history.html", user_history=user_history)
+
+
+@game.route("/leaderboard")
+def leaderboard():
+    region_key = request.args.get("region", "world")
+    if region_key not in REGIONS:
+        region_key = "world"
+    
+    game_modes = [
+        "2-alternatives", "4-alternatives", "6-alternatives", "write-in"
+    ]
+
+    region = REGIONS[region_key]["label"]
+
+    tops_by_mode = {}
+    for mode in game_modes:
+        pretty_mode = prettify_mode(mode)
+        tops = db.session.execute(
+            select(History)
+            .options(joinedload(History.user))
+            .where(History.region == region)
+            .where(History.mode == pretty_mode)
+            .order_by(desc(History.corrects), History.played_at)
+            .limit(10)
+        ).scalars().all()
+
+        tops_by_mode[pretty_mode] = tops
+
+    print(tops_by_mode)
+    return render_template("leaderboard.html",
+                           regions=REGIONS,
+                           game_modes=game_modes,
+                           current_region=region_key,
+                           tops=tops_by_mode)

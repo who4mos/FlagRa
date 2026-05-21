@@ -36,7 +36,7 @@
                   href="{{ url_for('game.play') if is_active_game else url_for('game.index') }}">Play</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link text-muted" href="#">Leaderboard</a>
+                <a class="nav-link {% if request.endpoint == 'game.leaderboard' %}active{% endif %}" href="{{ url_for('game.leaderboard') }}">Leaderboard</a>
               </li>
               {% if session.get('user_id') %}
               <li class="nav-item">
@@ -49,12 +49,12 @@
             <!-- user and theme nav -->
             <ul class="navbar-nav ms-auto">
               {% if session.get('user_id') %}
-              <div class="nav-item d-flex align-items-baseline gap-2 me-md-2">
+              <li class="nav-item d-flex align-items-baseline gap-2 me-md-2">
                 <span class="navbar-text">
                   <i class="bi bi-person"></i> {{ session.get('user_username') }}
                 </span>
                 <a class="btn btn-sm btn-outline-danger" href="{{ url_for('auth.logout') }}">Logout</a>
-              </div>
+              </li>
               {% else %}
               <li class="nav-item">
                 <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}" href="{{ url_for('auth.login') }}">Login</a>
