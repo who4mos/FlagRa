@@ -9,12 +9,12 @@ import redis
 from game import game
 from auth import auth
 
+
+load_dotenv()
+
 def create_app():
     app = Flask(__name__)
-
-    # this get the local secret key if a .env exists with SECRET_KEY
-    load_dotenv()
-
+    
     # if not on production and local secret don't exist as well load fallback str
     app.secret_key = os.environ.get("SECRET_KEY", "42069")
 

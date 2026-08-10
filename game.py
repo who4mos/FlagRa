@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+import os
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 import json
 import random
@@ -7,24 +9,68 @@ from sqlalchemy.orm import joinedload
 from database import db
 from models import History, User
 
+load_dotenv()
+
+# set api endpoint
+url = "https://api.restcountries.com/countries/v5"
+fields = "names.common,flag.url_svg,region,subregion,classification.dependency,classification.sovereign,classification.un_observer,memberships.un"
+
+api_key = os.getenv("REST_COUNTRIES_API_KEY")
+
+limit = 100
+offset = 0
+
+all_countries = []
+
+# loop to get all countries when server start, free plan limits to 100 countries per request
 try:
-    # get json from request
-    api_url = "https://restcountries.com/v3.1/all?fields=name,flags,region,subregion,independent"
-    response = requests.get(api_url)
-    
-    response.raise_for_status()  # raise error if http error
-    
-    all_flags = response.json()
+    while True:
+        response = requests.get(
+            f"{url}?limit={limit}&offset={offset}&response_fields={fields}",
+            headers={'Authorization': f'Bearer {api_key}'}
+        )
+        response.raise_for_status()
+
+        data = response.json()["data"]
+
+        all_countries.extend(data["objects"])
+
+        print(data["meta"])
+        if not data["meta"]["more"]:
+            break
+
+        offset += limit
 
     with open("restcountries.json", "w") as json_file:
-        json.dump(all_flags, json_file)
-except:
-    # load backup json
+        json.dump(all_countries, json_file)
+except Exception as e:
+    print(f"API request failed ({e}). Loading from restcountries.json fallback...")
     with open("restcountries.json") as json_file:
-        all_flags = json.load(json_file)
+        all_countries = json.load(json_file)
 
-# get all independent countries        
-flags = [country for country in all_flags if country.get("independent")]
+countries = []
+for country in all_countries:
+    name = country.get("names", {}).get("common")
+    flag_url = country.get("flag", {}).get("url_svg")
+    region = country.get("region")
+    subregion = country.get("subregion")
+    
+    is_un_member = country.get("memberships", {}).get("un", False)
+    is_un_observer = country.get("classification", {}).get("un_observer", False)
+    is_sovereign = country.get("classification", {}).get("sovereign", False)
+    is_dependency = country.get("classification", {}).get("dependency", False)
+
+    if (is_un_member or is_un_observer or is_sovereign) and not is_dependency:
+        if name and flag_url and region != "Antarctic":
+            countries.append({
+                "name": name,
+                "flag_url": flag_url,
+                "region": region,
+                "subregion": subregion
+            })
+    
+from pprint import pprint
+pprint(all_countries)
 
 REGIONS = {
     "world": {"label": "World", "image": "world-robinson.svg"},
@@ -67,16 +113,16 @@ def setup():
         region_key = "world"
 
     if region_key == "world":
-        flag_ids_queue = list(range(len(flags)))
+        flag_ids_queue = list(range(len(countries)))
     elif region_key == "north-central-america":
         flag_ids_queue = [
-            idx for idx, flag in enumerate(flags)
+            idx for idx, flag in enumerate(countries)
             if flag.get("subregion") in
-            ["North America", "Central America", "Caribbean"]
+            ["North America", "Northern America", "Central America", "Caribbean"]
         ]
     else:
         flag_ids_queue = [
-            idx for idx, flag in enumerate(flags)
+            idx for idx, flag in enumerate(countries)
             if flag.get("region") == REGIONS[region_key]["label"]
             or flag.get("subregion") == REGIONS[region_key]["label"]
         ]
@@ -106,14 +152,13 @@ def play():
         return redirect(url_for("game.index"))
     
     current_id = int(session.get("current_id", 0))
-
     if current_id >= len(flag_ids_queue):
         return redirect(url_for("game.show_results"))
 
-    correct_flag = flags[flag_ids_queue[current_id]]
+    correct_flag = countries[flag_ids_queue[current_id]]
 
-    correct_flag_name = correct_flag["name"]["common"]
-    correct_flag_url = correct_flag["flags"]["svg"]
+    correct_flag_name = correct_flag["name"]
+    correct_flag_url = correct_flag["flag_url"]
     session["correct_flag_name"] = correct_flag_name
     session["correct_flag_url"] = correct_flag_url
 
@@ -125,7 +170,7 @@ def play():
     
     if game_mode == "write-in":
         candidates = [
-            country["name"]["common"] for country in flags
+            country["name"] for country in countries
         ]
         
         return render_template("play.html",
@@ -143,7 +188,7 @@ def play():
 
         choices = []
         while len(choices) < alts - 1:
-            flag = flags[random.choice(flag_ids_queue)]
+            flag = countries[random.choice(flag_ids_queue)]
 
             if flag != correct_flag and flag not in choices:
                 choices.append(flag)
@@ -154,7 +199,8 @@ def play():
         return render_template("play.html",
                                game_mode=game_mode,
                                pretty_mode=pretty_mode,
-                               region=current_region,                                                       img_url=correct_flag_url,
+                               region=current_region,
+                               img_url=correct_flag_url,
                                choices=choices,
                                score=session.get("score",0),
                                current_id=session.get("current_id", 0))

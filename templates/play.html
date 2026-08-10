@@ -50,8 +50,8 @@
             <div class="row g-2">
               {% for choice in choices %}
               <div class="col-6 col-lg-12">
-                <button class="btn btn-outline-dark w-100 h-100" type="submit" name="guess" value="{{ choice['name']['common'] }}">
-                  {{ choice['name']['common'] }}
+                <button class="btn btn-outline-dark w-100 h-100" type="submit" name="guess" value="{{ choice['name'] }}">
+                  {{ choice['name'] }}
                 </button>
               </div>
               {% endfor %}
